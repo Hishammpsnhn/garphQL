@@ -1,38 +1,53 @@
-import { gql, useQuery } from '@apollo/client';
-import React from 'react'
+import { gql, useMutation, useQuery } from '@apollo/client';
+import React, { useState } from 'react'
+import { ADD_Books, GET_Author, GET_Books } from '../queries/queries';
 
 function AddBook() {
-    const GET_Author = gql`
-    query GetAuthors {
-      authors {
-        id
-        name
-      }
+
+    const { loading, error4, data } = useQuery(GET_Author);
+
+    const initialData = { name: "", genre: "", authorId: "" };
+    const [bookData, setBookData] = useState(initialData)
+
+    const [AddBook] = useMutation(ADD_Books, {
+        refetchQueries: [
+            { query: GET_Books }, // DocumentNode object parsed with gql
+            'GetComments' // Query name
+        ],
+    });
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        AddBook({
+            variables: {
+                name: bookData.name,
+                genre: bookData.genre,
+                authorId: bookData.authorId
+            }
+        });
     }
-  `;
-    const { loading, error, data } = useQuery(GET_Author);
-    console.log(data)
+
     if (loading) return (
         <div>
             <h5>Loading .....</h5>
         </div>
     )
+
     return (
-        <form id="add-book">
+        <form id="add-book" onSubmit={handleSubmit} >
             <div className="field">
                 <label>Book name:</label>
-                <input type="text" />
+                <input type="text" onChange={(e) => setBookData({ ...bookData, name: e.target.value })} />
             </div>
             <div className="field">
                 <label>Genre:</label>
-                <input type="text" />
+                <input type="text" onChange={(e) => setBookData({ ...bookData, genre: e.target.value })} />
             </div>
             <div className="field">
                 <label>Author:</label>
-                <select>
+                <select onChange={(e) => setBookData({ ...bookData, authorId: e.target.value })} >
                     <option >select Author</option>
                     {data.authors.map((author) => (
-                        <option key={author.id}>{author.name}</option>
+                        <option key={author.id} value={author.id}>{author.name}</option>
                     ))}
                 </select>
             </div>
