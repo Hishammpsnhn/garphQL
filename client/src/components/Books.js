@@ -1,15 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useQuery } from '@apollo/client';
 import { GET_Books } from '../queries/queries';
-
+import BookDetail from './BookDetail';
 
 function Books() {
+    const [selectedBookId, setSelectedBookId] = useState(null);
 
     const { loading, error, data } = useQuery(GET_Books);
     // console.log(data)
-    const handleBookDetails = (id) => {
-        console.log(id)
-    }
 
     if (loading) return (
         <div>
@@ -21,11 +19,13 @@ function Books() {
             <ul>
                 {data.books.map((book) => (
                     <div key={book.id}>
-                        <li onClick={()=>handleBookDetails(book.id)} >{book.name}</li>
+                        <li onClick={() => setSelectedBookId(book.id)} >{book.name}</li>
                     </div>
                 ))}
             </ul>
-        
+            {selectedBookId && (
+                <BookDetail bookId={selectedBookId} />
+            ) }
         </div>
     )
 }
